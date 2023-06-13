@@ -4,4 +4,10 @@ notebook
 numpy
 matplotlib
 seaborn
+ensure==1.0.2
+python-box==6.0.2
+pyYAML
+types-pyYAML
+joblib
+kaggle
 -e .
