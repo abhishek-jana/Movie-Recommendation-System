@@ -1,0 +1,7 @@
+streamlit
+pandas
+notebook
+numpy
+matplotlib
+seaborn
+-e .
