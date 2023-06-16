@@ -1,7 +1,14 @@
 artifacts_root: artifacts
-
+# poster path url: https://image.tmdb.org/t/p/w500
 data_ingestion:
   root_dir: artifacts/data_ingestion
   source_URL: https://files.grouplens.org/datasets/movielens/ml-latest.zip
   local_data_file: artifacts/data_ingestion/data.zip
   unzip_dir: artifacts/data_ingestion
+
+data_preparation:
+  root_dir: artifacts/data_preparation
+  source_URL: https://api.themoviedb.org/3/movie/
+  cache_dir: artifacts/data_preparation/cached_data
+  final_data_path: artifacts/data_preparation/final_data/final_data.feather
+  unique_category_path: artifacts/data_preparation/final_data/unique_categories.json
