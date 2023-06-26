@@ -14,18 +14,32 @@ This is a movie recommendation system that suggests movies to users based on the
 ```shell
 git clone https://github.com/abhishek-jana/movie-recommendation-system.git
 ```
-2. Install the required dependencies:
+
+2. Create a new environment using the following command:
+
+```shell
+conda create --name myenv
+```
+3. Activate the newly created environment:
+
+``` shell
+conda activate myenv
+```
+4. Install scikit-surprise from the conda-forge channel:
+```shell
+conda install -c conda-forge scikit-surprise
+```
+5. Install the required dependencies:
 
 ```shell
 cd movie-recommendation-system
 pip install -r requirements.txt
 ```
-
-3. Run the development server:
+6. Run the development server:
 ```shell
 streamlit run app.py
 ```
-4. Access the application in your web browser at `http://localhost:8501/`
+7. Access the application in your web browser at `http://localhost:8501/`
 
 ## Usage
 - Start the application and access it in your web browser.
