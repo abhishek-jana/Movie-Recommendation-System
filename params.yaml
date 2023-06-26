@@ -1,1 +1,2 @@
-key : val
+MIN_USER_RATING: 200 # we pick high number to make the matrix size small
+MIN_MOVIE_RATING: 50

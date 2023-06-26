@@ -2,6 +2,7 @@ streamlit
 pandas
 notebook
 numpy
+scipy
 matplotlib
 seaborn
 ensure==1.0.2
@@ -11,4 +12,6 @@ types-pyYAML
 joblib
 tqdm
 plotly
+scikit-learn
+scikit-surprise
 -e .

@@ -10,5 +10,23 @@ data_preparation:
   root_dir: artifacts/data_preparation
   source_URL: https://api.themoviedb.org/3/movie/
   cache_dir: artifacts/data_preparation/cached_data
-  final_data_path: artifacts/data_preparation/final_data/final_data.feather
+  # final_data_path: artifacts/data_preparation/final_data/final_data.feather
+  ratings_data_path: artifacts/data_preparation/final_data/ratings.csv
+  movies_data_path: artifacts/data_preparation/final_data/movies.csv
   unique_category_path: artifacts/data_preparation/final_data/unique_categories.json
+  
+content_based_model:
+  root_dir: artifacts/content_based_model
+  content_matrix: artifacts/content_based_model/content_matrix.npz
+
+collaborative_filtering_model:
+  root_dir: artifacts/collaborative_filtering_model
+  user_movie_matrix: artifacts/collaborative_filtering_model/user_movie_matrix.npz
+  nearest_neighbors_model: artifacts/collaborative_filtering_model/nearest_neighbors_movie.pkl
+  nn_item_indices: artifacts/collaborative_filtering_model/nn_item_indices.pkl
+  svd_model: artifacts/collaborative_filtering_model/svd_model.pkl
+  svd_user_indices: artifacts/collaborative_filtering_model/svd_user_indices.pkl
+  svd_item_indices: artifacts/collaborative_filtering_model/svd_item_indices.pkl
+  
+
+  

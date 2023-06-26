@@ -7,26 +7,65 @@ from MovieRecommender.pipeline.stage_02_data_preparation import (
     DataPreparationTrainingPipeline,
 )
 
-# from MovieRecommender.pipeline.stage_02_prepare_base_model import PrepareBaseModelTrainingPipeline
-# from MovieRecommender.pipeline.stage_03_training import ModelTrainingPipeline
+from MovieRecommender.pipeline.stage_03_content_based_model import (
+    ContentBasedModelTrainingPipeline,
+)
+
+from MovieRecommender.pipeline.stage_04_collaborative_filtering import CollaborativeFilteringTrainingPipeline
+
 # from MovieRecommender.pipeline.stage_04_evaluation import EvaluationPipeline
 
-STAGE_NAME = "Data Ingestion stage"
+# STAGE_NAME = "Data Ingestion stage"
+# try:
+#     logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
+#     data_ingestion = DataIngestionTrainingPipeline()
+#     data_ingestion.main()
+#     logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
+# except Exception as e:
+#     logger.exception(e)
+#     raise e
+
+# STAGE_NAME = "Data Preparation stage"
+# try:
+#     logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
+#     data_preparation = DataPreparationTrainingPipeline()
+#     data_preparation.main()
+#     logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
+# except Exception as e:
+#     logger.exception(e)
+#     raise e
+
+STAGE_NAME = "Content Based Model Training"
 try:
+    logger.info(f"*******************")
     logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
-    data_ingestion = DataIngestionTrainingPipeline()
-    data_ingestion.main()
+    content_based_model = ContentBasedModelTrainingPipeline()
+    content_based_model.main()
     logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
 except Exception as e:
     logger.exception(e)
     raise e
 
-STAGE_NAME = "Data Preparation stage"
+STAGE_NAME = "Collaborative Filtering Model Training"
 try:
+    logger.info(f"*******************")
     logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
-    data_preparation = DataPreparationTrainingPipeline()
-    data_preparation.main()
+    collaborative_filtering_model = CollaborativeFilteringTrainingPipeline()
+    collaborative_filtering_model.main()
     logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
 except Exception as e:
     logger.exception(e)
     raise e
+
+
+
+# STAGE_NAME = "Training stage"
+# try:
+#     logger.info(f"*******************")
+#     logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
+#     model_trainer = ModelTrainingPipeline()
+#     model_trainer.main()
+#     logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
+# except Exception as e:
+#     logger.exception(e)
+#     raise e

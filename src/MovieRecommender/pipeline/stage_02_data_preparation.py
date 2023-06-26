@@ -1,5 +1,6 @@
 from MovieRecommender.config.configuration import ConfigurationManager
 from MovieRecommender.components.data_preparation import DataPreparation
+from MovieRecommender.logging import logger
 
 STAGE_NAME = "Data Preparation stage"
 

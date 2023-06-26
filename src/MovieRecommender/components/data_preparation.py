@@ -308,9 +308,10 @@ class DataPreparation:
 
     def prepare_final_data(self):
         self.tmdb_df = pd.DataFrame(self.movie_data)
+        self.tmdb_df["tmdbId"] = self.tmdb_ids
         # merge tmdb data and links_movie data
         self.links_movie_df_merged = pd.merge(
-            self.links_movie_df, self.tmdb_df, left_index=True, right_index=True
+            self.links_movie_df, self.tmdb_df, on="tmdbId"
         )
         # drop NAN values
         self.links_movie_df_merged.dropna(axis=0, inplace=True)
@@ -318,39 +319,13 @@ class DataPreparation:
         self.links_movie_df_merged.drop(labels="genres_x", axis=1, inplace=True)
         # rename the other genres column
         self.links_movie_df_merged.rename(columns={"genres_y": "genres"}, inplace=True)
-        self.final_df = self.links_movie_df_merged.merge(self.ratings_df, on="movieId")
-        # Convert float64 columns to float32
-        float_columns = ["popularity", "vote_average", "rating"]
-        self.final_df[float_columns] = self.final_df[float_columns].astype("float32")
 
-        # Convert int64 columns to int32
-        int_columns = ["movieId", "imdbId", "tmdbId", "vote_count", "userId"]
-        self.final_df[int_columns] = self.final_df[int_columns].astype("int32")
-
-        # Define the desired column order
-        column_order = [
-            "movieId",
-            "imdbId",
-            "tmdbId",
-            "title",
-            "genres",
-            "director",
-            "overview",
-            "vote_average",
-            "vote_count",
-            "popularity",
-            "keywords",
-            "userId",
-            "rating",
-            "poster_path",
-        ]
-        self.final_df = self.reindex_columns(self.final_df, column_order)
         logger.info(f"Final data prepared")
 
     def save_final_data_in_db(self):
-        self.save_dataframe_to_feather(self.final_df, self.config.final_data_path)
-        logger.info(
-            f"Final data saved successfully as '{self.config.final_data_path}'."
+        self.save_dataframe_to_csv(self.ratings_df, self.config.ratings_data_path)
+        self.save_dataframe_to_csv(
+            self.links_movie_df_merged, self.config.movies_data_path
         )
         unique_genres_list = self.unique_genres(self.links_movie_df_merged)
         with open(self.config.unique_category_path, "w") as file:

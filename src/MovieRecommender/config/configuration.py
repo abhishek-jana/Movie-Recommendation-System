@@ -3,6 +3,7 @@ from MovieRecommender.utils.common import read_yaml, create_directories
 from MovieRecommender.entity.config_entity import (
     DataIngestionConfig,
     DataPreparationConfig,
+    ContentBasedModelConfig,CollaborativeFilteringConfig
 )
 
 
@@ -31,7 +32,7 @@ class ConfigurationManager:
 
     def get_data_preparation_config(self) -> DataPreparationConfig:
         data_preparation = self.config.data_preparation
-        final_data_dir = os.path.dirname(data_preparation.final_data_path)
+        final_data_dir = os.path.dirname(data_preparation.ratings_data_path)
         create_directories(
             [
                 Path(data_preparation.root_dir),
@@ -55,8 +56,45 @@ class ConfigurationManager:
             movies_data=Path(movies_data),
             links_data=Path(links_data),
             ratings_data=Path(ratings_data),
-            final_data_path=Path(data_preparation.final_data_path),
+            ratings_data_path=Path(data_preparation.ratings_data_path),
+            movies_data_path=Path(data_preparation.movies_data_path),
             unique_category_path=Path(data_preparation.unique_category_path),
         )
 
         return data_preparation_config
+    
+    def get_content_based_model_config(self) -> ContentBasedModelConfig:
+        content_based_model = self.config.content_based_model
+
+        create_directories([content_based_model.root_dir])
+
+        content_based_model_config = ContentBasedModelConfig(
+            root_dir = Path(content_based_model.root_dir),
+            movies_data = Path(self.config.data_preparation.movies_data_path),
+            content_matrix = Path(content_based_model.content_matrix)
+            
+        )
+
+        return content_based_model_config
+    
+    def get_collaborative_filtering_model_config(self) -> CollaborativeFilteringConfig:
+            collab_filter_model = self.config.collaborative_filtering_model
+
+            create_directories([collab_filter_model.root_dir])
+
+            content_based_model_config = CollaborativeFilteringConfig(
+                root_dir = Path(collab_filter_model.root_dir),
+                movies_data = Path(self.config.data_preparation.movies_data_path),
+                ratings_data= Path(self.config.data_preparation.ratings_data_path),
+                user_movie_matrix = Path(collab_filter_model.user_movie_matrix),
+                nearest_neighbors_model = Path(collab_filter_model.nearest_neighbors_model),
+                nn_item_indices = Path(collab_filter_model.nn_item_indices),
+                svd_model = Path(collab_filter_model.svd_model),
+                svd_user_indices = Path(collab_filter_model.svd_user_indices),
+                svd_item_indices = Path(collab_filter_model.svd_item_indices),
+                params_min_user_rating = self.params.MIN_USER_RATING,
+                params_min_movie_rating=self.params.MIN_MOVIE_RATING
+                
+            )
+
+            return content_based_model_config
