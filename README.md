@@ -9,6 +9,8 @@ This is a movie recommendation system that suggests movies to users based on the
 
 ## Setup and Installation
 
+Anaconda installation is necessary for this project as using pip to install 'scikit-surprise' package make create problems. For insatallation of Anaconda package, please refer [here](https://docs.anaconda.com/free/anaconda/install/index.html).
+
 1. Clone the repository:
 
 ```shell
