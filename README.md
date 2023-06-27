@@ -64,7 +64,7 @@ Here is a screenshot of the movie recommendation system app:
 ## Data Gathering
 The movie data for this project is gathered from the following sources:
 
-- [MovieLens](https://grouplens.org/datasets/movielens/): MovieLens provides a collection of movie ratings data from various sources, which is used to train the recommendation models.
+- [MovieLens](https://grouplens.org/datasets/movielens/): MovieLens provides a collection of movie ratings data from various sources, which is used to train the recommendation models. Full: 27,000,000 ratings and 1,100,000 tag applications applied to 58,000 movies by 280,000 users. Includes tag genome data with 14 million relevance scores across 1,100 tags. Last updated 9/2018.
 
 - [TMDB](https://www.themoviedb.org/): TMDB is a comprehensive movie database that provides detailed information about movies, including ratings, reviews, and metadata. It is used to supplement the movie data and provide additional information for better recommendations.
 
