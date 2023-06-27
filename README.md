@@ -55,6 +55,12 @@ Here is a screenshot of the movie recommendation system app:
 
 ![Movie Recommendation System](images/webapp1.jpg)
 ![Movie Recommendation System](images/webapp2.jpg)
+![Movie Recommendation System](images/webapp3.jpg)
+![Movie Recommendation System](images/webapp4.jpg)
+![Movie Recommendation System](images/webapp5.jpg)
+![Movie Recommendation System](images/webapp6.jpg)
+![Movie Recommendation System](images/webapp7.jpg)
+
 
 ## Data Gathering
 The movie data for this project is gathered from the following sources:
