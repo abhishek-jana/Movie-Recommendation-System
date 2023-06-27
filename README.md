@@ -53,8 +53,6 @@ streamlit run app.py
 
 Here is a screenshot of the movie recommendation system app:
 
-![Movie Recommendation System](images/webapp1.jpg)
-![Movie Recommendation System](images/webapp2.jpg)
 ![Movie Recommendation System](images/webapp3.jpg)
 ![Movie Recommendation System](images/webapp4.jpg)
 ![Movie Recommendation System](images/webapp5.jpg)
