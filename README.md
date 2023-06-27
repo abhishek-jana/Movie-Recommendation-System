@@ -52,12 +52,13 @@ streamlit run app.py
 ## Results
 
 Here is a screenshot of the movie recommendation system app:
-
-![Movie Recommendation System](images/webapp3.jpg)
-![Movie Recommendation System](images/webapp4.jpg)
-![Movie Recommendation System](images/webapp5.jpg)
-![Movie Recommendation System](images/webapp6.jpg)
-![Movie Recommendation System](images/webapp7.jpg)
+![Movie Recommendation System1](images/webapp1.jpg)
+![Movie Recommendation System2](images/webapp2.jpg)
+![Content Based](images/webapp3.jpg)
+![Similar User Based](images/webapp4.jpg)
+![Movie Recommendation Existing User1](images/webapp5.jpg)
+![Movie Recommendation Existing User2](images/webapp6.jpg)
+![Movie Recommendation Existing User and Movies Watched](images/webapp7.jpg)
 
 
 ## Data Gathering
