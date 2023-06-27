@@ -13,6 +13,6 @@ joblib
 tqdm
 plotly
 scikit-learn
-textwrap
+textwrap3
 # scikit-surprise
 -e .
