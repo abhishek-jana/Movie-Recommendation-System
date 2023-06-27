@@ -12,6 +12,9 @@ class RecommendationPipeline:
         self.movies_df = pd.read_csv(
             os.path.join("artifacts", "data_preparation", "final_data", "movies.csv")
         )[["title", "movieId", "tmdbId", "genres", "poster_path"]]
+        self.movies_df["year"] = (
+            self.movies_df["title"].str.extract(r"\((\d{4})\)").fillna(-1)
+        )
         self.ratings_df = pd.read_csv(
             os.path.join("artifacts", "data_preparation", "final_data", "ratings.csv")
         )
@@ -85,8 +88,16 @@ class RecommendationPipeline:
                 "rb",
             )
         )
+        self.svd_user_indices = pickle.load(
+            open(
+                os.path.join(
+                    "artifacts", "collaborative_filtering_model", "svd_user_indices.pkl"
+                ),
+                "rb",
+            )
+        )
 
-    def create_ranked_df(self, movies, reviews, min_rating=10):
+    def create_ranked_df(self, movies, reviews, min_rating=0):
         """
         INPUT
         movies - the movies dataframe
@@ -195,10 +206,12 @@ class RecommendationPipeline:
         top_movies - a list of the n_top recommended movies by movie title in order best to worst
         """
 
-        ranked_movies = self.create_ranked_df(self.movies_df, self.ratings_df)
-        ranked_movies["year"] = (
-            ranked_movies["title"].str.extract(r"\((\d+)\)").fillna(-1)
+        ranked_movies = self.create_ranked_df(
+            self.movies_df, self.ratings_df, min_rating=20
         )
+        # ranked_movies["year"] = (
+        #     ranked_movies["title"].str.extract(r"\((\d+)\)").fillna(-1)
+        # )
 
         # Create new columns based on the number of unique genres
         genre_columns = []
@@ -266,7 +279,7 @@ class RecommendationPipeline:
         movies_list = self.movies_df.iloc[ind]["title"].tolist()
         movie_data = movie_data[movie_data["title"].isin(movies_list)]
 
-        poster_url = self.fetch_poster_url(movies_list)
+        poster_url = self.fetch_poster_url(movie_data["title"].tolist())
         movie_data["poster_path"] = poster_url
         movie_data = movie_data.rename(
             columns={"weighted_rating": "rating", "title": "movie"}
@@ -333,7 +346,8 @@ class RecommendationPipeline:
             key for key, _ in self.svd_item_indices.items() if key not in watched_movies
         ]
         # Step 3: Determine the number of similar movies to consider
-        num_similar_movies = max(len(watched_movies) * 1.5, 20)
+        # num_similar_movies = max(len(watched_movies) * 1.5, 20)
+        num_similar_movies = min(len(watched_movies), 25)
 
         # Step 1: Get recommendations from recommend_movie_neighbour
         recommendations = self.recommend_movie_neighbour(

@@ -1,15 +1,93 @@
 import streamlit as st
 import plotly.graph_objects as go
 import plotly.colors as pc
+from src.MovieRecommender.pipeline.make_rocommendation import RecommendationPipeline
 import numpy as np
+from textwrap3 import wrap
 
 
-def render_spider_chart(categories, data):
+@st.cache_resource
+def make_recommendation():
+    return RecommendationPipeline()
+
+
+make_reco = make_recommendation()
+
+
+def create_movie_layout(data):
+    st.image(data["poster_path"])
+    st.markdown(data["movie"])
+    with st.expander("See details"):
+        st.write(f"Rating: {data['rating']}/5")
+
+
+def create_movie_layout_v2(data, num_columns=5):
+    num_movies = len(data)
+    num_rows = (num_movies + num_columns - 1) // num_columns
+    image_width = 140
+
+    for i in range(num_rows):
+        col1, col2, col3, col4, col5 = st.columns(num_columns)
+        cols = [col1, col2, col3, col4, col5]
+        for j in range(num_columns):
+            index = i * num_columns + j
+            if index < num_movies:
+                movie = data.iloc[index]
+                col = cols[j]
+                with col:
+                    st.image(movie["poster_path"], width=image_width)
+                    st.markdown(wrap(movie["movie"]), 35)
+                    st.markdown(f"Rating: {movie['rating']}/5")
+                    # with st.expander("See details"):
+                    #     st.markdown(
+                    #         f"Potential match: {np.round(100*movie['pred_rating']/5,2)} \%"
+                    #     )
+                    # Add additional details as needed
+            else:
+                # Add an empty column if there are fewer movies than columns
+                st.empty()
+
+
+def create_movie_layout_by_user(data):
+    st.image(data["poster_path"])
+    st.markdown(data["movie"])
+    st.markdown(f"Potential match: {np.round(100*data['pred_rating']/5,2)} \%")
+
+
+def create_movie_layout_by_user_v2(data, num_columns=5):
+    num_movies = len(data)
+    num_rows = (num_movies + num_columns - 1) // num_columns
+    image_width = 140
+    for i in range(num_rows):
+        col1, col2, col3, col4, col5 = st.columns(num_columns)
+        cols = [col1, col2, col3, col4, col5]
+        for j in range(num_columns):
+            index = i * num_columns + j
+            if index < num_movies:
+                movie = data.iloc[index]
+                col = cols[j]
+                with col:
+                    st.image(movie["poster_path"], width=image_width)
+                    st.markdown(wrap(movie["movie"]), 35)
+                    st.markdown(
+                        f"Potential match: {np.round(100*movie['pred_rating']/5,2)} \%"
+                    )
+                    # with st.expander("See details"):
+                    #     st.markdown(
+                    #         f"Potential match: {np.round(100*movie['pred_rating']/5,2)} \%"
+                    #     )
+                    # Add additional details as needed
+            else:
+                # Add an empty column if there are fewer movies than columns
+                st.empty()
+
+
+def render_spider_chart(cat, data):
     color_map = pc.qualitative.Plotly + pc.qualitative.Set3
 
     fig = go.Figure()
 
-    for i, category in enumerate(categories):
+    for i, category in enumerate(cat):
         if i < len(data):
             color_index = i % len(color_map)
             color = color_map[color_index]
@@ -22,8 +100,8 @@ def render_spider_chart(categories, data):
                     theta=[
                         category,
                         category,
-                        categories[next_data_index],
-                        categories[i],
+                        cat[next_data_index],
+                        cat[i],
                     ],
                     fill="toself",
                     fillcolor=color,
@@ -46,34 +124,28 @@ def render_spider_chart(categories, data):
 
 
 # Example data
-categories = [
-    "Action",
-    "Adventure",
-    "Animation",
-    "Comedy",
-    "Crime",
-    "Documentary",
-    "Drama",
-    "Family",
-    "Fantasy",
-    "History",
-    "Horror",
-    "Music",
-    "Mystery",
-    "Romance",
-    "Science Fiction",
-    "TV Movie",
-    "Thriller",
-    "War",
-    "Western",
-]
-data = np.random.randint(1, 10, size=len(categories))
+categories = make_reco.unique_genres
+years = make_reco.movies_df["year"].astype(str).unique()
+movies_list = list(make_reco.indices.keys())
+existing_users = list(make_reco.svd_user_indices.keys())
+existing_movies = list(make_reco.svd_item_indices.keys())
 
 
 st.title("Movie Recommendation System")
 
 st.write(
     "This is a Movie Recommendation System that recommends movies based on your ratings."
+)
+
+# Get user input or selection
+calculate_most_popular = st.checkbox("Most Popular Movies Based on Genre")
+calculate_content_based = st.checkbox("Content Based Movie Recommendation")
+calculate_similar_user_based = st.checkbox("Similar User Based Movie Recommendation")
+calculate_existing_user_based = st.checkbox(
+    "Movie Recommendation Based on an Existing User"
+)
+calculate_movie_user_based = st.checkbox(
+    "Movie Recommendation Based on an Existing User and Movies Watched"
 )
 
 
@@ -130,160 +202,47 @@ with st.expander("See details"):
         """
     )
 
-genre = st.selectbox(
-    "Select a genre",
-    (
-        "Action",
-        "Adventure",
-        "Animation",
-        "Comedy",
-        "Crime",
-        "Documentary",
-        "Drama",
-        "Fantasy",
-        "Film-Noir",
-        "Horror",
-        "Musical",
-        "Mystery",
-        "Romance",
-        "Sci-Fi",
-        "Thriller",
-        "War",
-        "Western",
-    ),
-)
-
-if st.button("Show Recommendation", key="1"):
-    st.write(f"Here are the top 10 {genre} based movies")
-    col1, col2, col3, col4, col5 = st.columns(5)
-
+if calculate_most_popular:
+    col1, col2 = st.columns(2)
     with col1:
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
+        genre = st.multiselect(
+            "Select genre(s)",
+            [None] + categories,
+            help="Select genre(s) or leave it blank",
+        )
+
+        if None in genre:
+            # If None is selected, disable or clear other options
+            genre = categories  # Clear the selection
+
+        else:
+            # Other options are allowed
+            # Process the selected genres
+            pass
 
     with col2:
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
-    with col3:
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
-    with col4:
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
-    with col5:
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
-st.header("Similar Movie Recommendation")
+        year = st.multiselect(
+            "Select year(s)",
+            [None] + list(years),
+            help="Select year(s) or leave it blank",
+        )
+        if None in year:
+            # If None is selected, disable or clear other options
+            year = list(years)  # Clear the selection
+            # Or disable other options
+
+        else:
+            # Other options are allowed
+            # Process the selected genres
+            pass
+
+    if st.button("Show Recommendation", key="1"):
+        st.write(f"Here are the top 10 most popular movies")
+        popular_df = make_reco.popular_recs_filtered(n_top=10, years=year, genres=genre)
+        popular_df = popular_df.sort_values("rating", ascending=False)
+        create_movie_layout_v2(data=popular_df, num_columns=5)
+
+st.header("Content Based Movie Recommendation")
 with st.expander("See details"):
     st.write(
         """
@@ -331,150 +290,26 @@ with st.expander("See details"):
         """
     )
 
-st.write("Select a movie from the list below to see its similar movies.")
-movie = st.selectbox(
-    "Select a movie",
-    (
-        "The Shawshank Redemption",
-        "The Godfather",
-        "The Godfather: Part II",
-        "The Dark Knight",
-        "The Dark Knight Rises",
-        "The Good, the Bad and the Ugly",
-        "The Good, the Bad and the Ugly 2",
-    ),
-)
+if calculate_content_based:
+    st.write("Select a movie from the list below to see its similar movies.")
+    movie = st.selectbox("Select a movie", movies_list, key="10")
 
-if st.button("Show Recommendation", key="2"):
-    st.write(f"Here are the top 10 movies similar to {movie}")
-    col1, col2, col3, col4, col5 = st.columns(5)
+    if st.button("Show Recommendation", key="2"):
+        st.write(f"Here are the top 10 movies similar to {movie}")
+        content_reco_df = make_reco.content_recommendations(movie)
+        create_movie_layout_v2(data=content_reco_df, num_columns=5)
 
-    with col1:
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
+st.header("Similar User Based Movie Recommendation")
 
-    with col2:
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
-    with col3:
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
-    with col4:
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
-    with col5:
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
+if calculate_similar_user_based:
+    st.write("Select a movie from the list below to see its similar movies.")
+    movie_nn = st.selectbox("Select a movie", movies_list, key="20")
+
+    if st.button("Show Recommendation", key="3"):
+        st.write(f"Here are the top 10 movies other users are watching")
+        neighbour_reco_df = make_reco.recommend_movie_neighbour(movie_nn)
+        create_movie_layout_v2(data=neighbour_reco_df, num_columns=5)
+
 st.header("Movie Recommendation Based on an Existing User")
 with st.expander("See details"):
     st.write(
@@ -528,156 +363,86 @@ with st.expander("See details"):
         """
     )
 
-col1, col2 = st.columns(2)
-with col1:
-    user = st.selectbox("Select an existing user", ("John Doe", "Jane Doe"))
-with st.expander("See details"):
-    # Render the Spider Chart
-    spider_chart = render_spider_chart(categories, data)
 
-    # Render the chart in Streamlit
-    st.plotly_chart(spider_chart)
+if calculate_existing_user_based:
+    user = st.selectbox("Select an existing user", existing_users, key="30")
 
-with col2:
-    movie = st.selectbox(
-        "Select a movie",
-        (
-            "The Shawshank Redemption",
-            "The Godfather",
-            "The Godfather: Part II",
-        ),
-    )
+    user_profile = make_reco.get_user_profile(user)
+    with st.expander("See details"):
+        # Render the Spider Chart
+        spider_chart = render_spider_chart(
+            list(user_profile.keys()), list(user_profile.values())
+        )
 
-if st.button("Show Recommendation", key="3"):
-    # st.text(f"Here are the top 10 movies similar to {movie}")
-    st.write(
-        f"Here are the top 10 recommedations for: {user} based on the movie: {movie}"
-    )
-    col1, col2, col3, col4, col5 = st.columns(5)
+        # Render the chart in Streamlit
+        st.plotly_chart(spider_chart)
 
+    # if st.button("Show Recommendation", key="4"):
+    #     st.write(f"Based on user: {user}'s profile, we recommend the following movies.")
+    #     top_user_df = make_reco.recommend_top_movie_user(user, n_top=10)
+    #     col1, col2, col3, col4, col5 = st.columns(5)
+
+    #     with col1:
+    #         create_movie_layout_by_user(top_user_df.iloc[0])
+    #         create_movie_layout_by_user(top_user_df.iloc[5])
+
+    #     with col2:
+    #         create_movie_layout_by_user(top_user_df.iloc[1])
+    #         create_movie_layout_by_user(top_user_df.iloc[6])
+
+    #     with col3:
+    #         create_movie_layout_by_user(top_user_df.iloc[2])
+    #         create_movie_layout_by_user(top_user_df.iloc[7])
+
+    #     with col4:
+    #         create_movie_layout_by_user(top_user_df.iloc[3])
+    #         create_movie_layout_by_user(top_user_df.iloc[8])
+
+    #     with col5:
+    #         create_movie_layout_by_user(top_user_df.iloc[4])
+    #         create_movie_layout_by_user(top_user_df.iloc[9])
+
+    if st.button("Show Recommendation", key="4"):
+        st.write(f"Based on user: {user}'s profile, we recommend the following movies.")
+
+        # Organize the recommendations in a structured manner
+        top_user_df = make_reco.recommend_top_movie_user(user, n_top=10)
+        create_movie_layout_by_user_v2(data=top_user_df, num_columns=5)
+
+st.header("Movie Recommendation Based on an Existing User and Movies Watched")
+
+if calculate_movie_user_based:
+    col1, col2 = st.columns(2)
     with col1:
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
+        user_svd = st.selectbox("Select an existing user", existing_users, key="40")
 
     with col2:
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
-    with col3:
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
-    with col4:
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
-    with col5:
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
-        st.image("http://images.amazon.com/images/P/0195153448.01.LZZZZZZZ.jpg")
-        st.markdown(f"The Shawshank Redemption")
-        with st.expander("See details"):
-            st.write("Rating : 5/10")
-            st.write(
-                """
-                Overview: \n
-                The chart above shows some numbers I picked for you.
-                I rolled actual dice for these, so they're *guaranteed* to
-                be random.
-            """
-            )
+        movie_svd = st.selectbox("Select a movie", existing_movies, key="50")
+
+    if st.button("Show Recommendation", key="5"):
+        st.write(
+            f"Here are the top 10 recommedations for: {user_svd} based on the movie: {movie_svd}"
+        )
+        top_movie_user_df = make_reco.recommend_similar_movie_user(user_svd, movie_svd)
+        create_movie_layout_by_user_v2(data=top_movie_user_df, num_columns=5)
+        # col1, col2, col3, col4, col5 = st.columns(5)
+
+        # with col1:
+        #     create_movie_layout_by_user(top_movie_user_df.iloc[0])
+        #     create_movie_layout_by_user(top_movie_user_df.iloc[5])
+
+        # with col2:
+        #     create_movie_layout_by_user(top_movie_user_df.iloc[1])
+        #     create_movie_layout_by_user(top_movie_user_df.iloc[6])
+
+        # with col3:
+        #     create_movie_layout_by_user(top_movie_user_df.iloc[2])
+        #     create_movie_layout_by_user(top_movie_user_df.iloc[7])
+
+        # with col4:
+        #     create_movie_layout_by_user(top_movie_user_df.iloc[3])
+        #     create_movie_layout_by_user(top_movie_user_df.iloc[8])
+
+        # with col5:
+        #     create_movie_layout_by_user(top_movie_user_df.iloc[4])
+        #     create_movie_layout_by_user(top_movie_user_df.iloc[9])
