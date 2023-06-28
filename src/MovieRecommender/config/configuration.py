@@ -3,7 +3,8 @@ from MovieRecommender.utils.common import read_yaml, create_directories
 from MovieRecommender.entity.config_entity import (
     DataIngestionConfig,
     DataPreparationConfig,
-    ContentBasedModelConfig,CollaborativeFilteringConfig
+    ContentBasedModelConfig,
+    CollaborativeFilteringConfig,
 )
 
 
@@ -40,14 +41,15 @@ class ConfigurationManager:
                 Path(final_data_dir),
             ]
         )
+        folder = self.config.data_ingestion.source_URL.split("/")[-1].split(".zip")[0]
         movies_data = os.path.join(
-            self.config.data_ingestion.unzip_dir, "ml-latest/movies.csv"
+            self.config.data_ingestion.unzip_dir, folder, "movies.csv"
         )
         links_data = os.path.join(
-            self.config.data_ingestion.unzip_dir, "ml-latest/links.csv"
+            self.config.data_ingestion.unzip_dir, folder, "links.csv"
         )
         ratings_data = os.path.join(
-            self.config.data_ingestion.unzip_dir, "ml-latest/ratings.csv"
+            self.config.data_ingestion.unzip_dir, folder, "ratings.csv"
         )
         data_preparation_config = DataPreparationConfig(
             root_dir=Path(data_preparation.root_dir),
@@ -62,39 +64,37 @@ class ConfigurationManager:
         )
 
         return data_preparation_config
-    
+
     def get_content_based_model_config(self) -> ContentBasedModelConfig:
         content_based_model = self.config.content_based_model
 
         create_directories([content_based_model.root_dir])
 
         content_based_model_config = ContentBasedModelConfig(
-            root_dir = Path(content_based_model.root_dir),
-            movies_data = Path(self.config.data_preparation.movies_data_path),
-            content_matrix = Path(content_based_model.content_matrix)
-            
+            root_dir=Path(content_based_model.root_dir),
+            movies_data=Path(self.config.data_preparation.movies_data_path),
+            content_matrix=Path(content_based_model.content_matrix),
         )
 
         return content_based_model_config
-    
+
     def get_collaborative_filtering_model_config(self) -> CollaborativeFilteringConfig:
-            collab_filter_model = self.config.collaborative_filtering_model
+        collab_filter_model = self.config.collaborative_filtering_model
 
-            create_directories([collab_filter_model.root_dir])
+        create_directories([collab_filter_model.root_dir])
 
-            content_based_model_config = CollaborativeFilteringConfig(
-                root_dir = Path(collab_filter_model.root_dir),
-                movies_data = Path(self.config.data_preparation.movies_data_path),
-                ratings_data= Path(self.config.data_preparation.ratings_data_path),
-                user_movie_matrix = Path(collab_filter_model.user_movie_matrix),
-                nearest_neighbors_model = Path(collab_filter_model.nearest_neighbors_model),
-                nn_item_indices = Path(collab_filter_model.nn_item_indices),
-                svd_model = Path(collab_filter_model.svd_model),
-                svd_user_indices = Path(collab_filter_model.svd_user_indices),
-                svd_item_indices = Path(collab_filter_model.svd_item_indices),
-                params_min_user_rating = self.params.MIN_USER_RATING,
-                params_min_movie_rating=self.params.MIN_MOVIE_RATING
-                
-            )
+        content_based_model_config = CollaborativeFilteringConfig(
+            root_dir=Path(collab_filter_model.root_dir),
+            movies_data=Path(self.config.data_preparation.movies_data_path),
+            ratings_data=Path(self.config.data_preparation.ratings_data_path),
+            user_movie_matrix=Path(collab_filter_model.user_movie_matrix),
+            nearest_neighbors_model=Path(collab_filter_model.nearest_neighbors_model),
+            nn_item_indices=Path(collab_filter_model.nn_item_indices),
+            svd_model=Path(collab_filter_model.svd_model),
+            svd_user_indices=Path(collab_filter_model.svd_user_indices),
+            svd_item_indices=Path(collab_filter_model.svd_item_indices),
+            params_min_user_rating=self.params.MIN_USER_RATING,
+            params_min_movie_rating=self.params.MIN_MOVIE_RATING,
+        )
 
-            return content_based_model_config
+        return content_based_model_config
