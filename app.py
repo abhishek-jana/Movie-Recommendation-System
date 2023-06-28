@@ -137,6 +137,7 @@ st.write(
     "This is a Movie Recommendation System that recommends movies based on your ratings."
 )
 
+st.write("Select recommendation engine from the options below.")
 # Get user input or selection
 calculate_most_popular = st.checkbox("Most Popular Movies Based on Genre")
 calculate_content_based = st.checkbox("Content Based Movie Recommendation")
