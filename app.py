@@ -36,7 +36,7 @@ def create_movie_layout_v2(data, num_columns=5):
                 col = cols[j]
                 with col:
                     st.image(movie["poster_path"], width=image_width)
-                    st.markdown(wrap(movie["movie"]), 35)
+                    st.markdown(wrap(movie["movie"], 35)[0])
                     st.markdown(f"Rating: {movie['rating']}/5")
                     # with st.expander("See details"):
                     #     st.markdown(
@@ -68,7 +68,7 @@ def create_movie_layout_by_user_v2(data, num_columns=5):
                 col = cols[j]
                 with col:
                     st.image(movie["poster_path"], width=image_width)
-                    st.markdown(wrap(movie["movie"]), 35)
+                    st.markdown(wrap(movie["movie"], 35)[0])
                     st.markdown(
                         f"Potential match: {np.round(100*movie['pred_rating']/5,2)} \%"
                     )
