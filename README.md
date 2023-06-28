@@ -2,6 +2,8 @@
 
 This is a movie recommendation system that suggests movies to users based on their preferences. The system utilizes various recommendation methods, including content-based filtering (most popular movies), collaborative filtering, and recommendation specific to existing users, to provide personalized movie recommendations.
 
+A small deployed version of this app can be found [here](https://movie-recommeder.streamlit.app/)
+
 ## Features
 
 - **Movie search**: Users can search for specific movies and view detailed information about them, including ratings and reviews.
@@ -42,6 +44,8 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 7. Access the application in your web browser at `http://localhost:8501/`
+
+
 
 ## Usage
 - Start the application and access it in your web browser.
